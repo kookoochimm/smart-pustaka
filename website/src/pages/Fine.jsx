@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./fine.css";
 
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:5003/api";
+
 import maraLogo from "../assets/Mara.png";
 import tvetmaraLogo from "../assets/Tmsp.png";
 
@@ -47,11 +50,14 @@ function Fine({ user }) {
             try {
                 setLoading(true);
                 setError("");
-
+            
                 const response = await axios.get(
-                    `http://localhost:5003/api/website/fine`, {
+                    `${API_URL}/website/fine`,
+                    {
                         params: { userId: user.user_id },
-                        headers: { Authorization: `Bearer ${localStorage.getItem("token") || ""}` },
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+                        },
                     }
                 );
 
