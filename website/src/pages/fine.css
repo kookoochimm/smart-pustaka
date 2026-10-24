@@ -1,0 +1,269 @@
+.fine-screen {
+    min-height: 100vh;
+    width: 100%;
+    background-image: url("../assets/Background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 20px 0;
+}
+
+.fine-container {
+    position: relative;
+    width: 850px;
+    max-width: 100%;
+    min-height: 600px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px;
+    box-sizing: border-box;
+}
+
+.logos {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.mara-logo { width: 75px; height: auto; object-fit: contain; }
+.tvetmara-logo { width: 150px; height: auto; object-fit: contain; }
+
+.fine-container h3 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #000;
+    text-align: center;
+}
+
+.fine-container h2 {
+    margin: 8px 0;
+    font-size: 42px;
+    font-weight: 700;
+    color: #191970;
+    overflow-wrap: anywhere;
+}
+
+.fine-container h1 {
+    margin: 35px 0 0 !important;
+    font-size: 52px !important;
+    font-weight: 700 !important;
+    color: #8B0000 !important;
+    text-align: center !important;
+}
+
+.fine-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fine-list {
+    width: 100%;
+    max-height: 48vh;
+    overflow-y: auto;
+    padding: 2px 5px 2px 0;
+    margin-top: 10px;
+}
+
+.fine-info {
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 15px;
+    background: #f5f5f5;
+    padding: 14px;
+    box-sizing: border-box;
+}
+
+.fine-book-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.fine-book-image-wrap {
+    flex: 0 0 135px;
+    width: 135px;
+}
+
+.fine-book-image {
+    display: block;
+    width: 100%;
+    height: 190px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.fine-book-image-placeholder {
+    width: 100%;
+    height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px dashed #aaa;
+    border-radius: 8px;
+    color: #666;
+    font-size: 12px;
+    text-align: center;
+    background: #fff;
+}
+
+.fine-book-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.info-row:last-child { border-bottom: none; }
+.info-label { flex: 0 0 auto; font-size: 15px; font-weight: bold; color: #000; }
+.info-value { min-width: 0; font-size: 15px; color: #2F4F4F; text-align: right; overflow-wrap: anywhere; }
+
+.fine-count, .fine-total {
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    margin: 12px 0 0;
+}
+
+.fine-total {
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 12px;
+    color: #8B0000;
+    font-size: 18px;
+}
+
+.fine-message {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 16px;
+    color: #2F4F4F;
+}
+
+.fine-error { color: #8B0000; }
+
+.slogan {
+    margin-top: 35px;
+    padding: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+    text-align: center;
+}
+
+.fine-back-button {
+    margin-top: 20px;
+    padding: 10px 28px;
+    background-color: #191970;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.fine-back-button:hover { background-color: #000080; }
+.fine-back-button:active { transform: scale(0.98); }
+
+@media (max-width: 576px) {
+    .fine-container { padding: 90px 20px 30px; }
+    .mara-logo { width: 55px; }
+    .tvetmara-logo { width: 115px; }
+    .fine-container h2 { font-size: 32px; }
+    .fine-container h1 { font-size: 38px !important; }
+    .fine-container h3 { font-size: 18px; }
+    .fine-list { max-height: 55vh; }
+    .fine-book-layout { gap: 10px; }
+    .fine-book-image-wrap { flex-basis: 95px; width: 95px; }
+    .fine-book-image, .fine-book-image-placeholder { height: 140px; }
+    .info-row { gap: 10px; }
+    .info-label, .info-value { font-size: 13px; }
+}
+
+
+/* Date and fine information arranged in compact horizontal groups */
+.date-pair-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.return-fine-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 0.9fr;
+    gap: 12px;
+    padding: 10px 0 2px;
+}
+
+.date-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    min-width: 0;
+}
+
+.date-info .info-label {
+    font-size: 15px;
+    font-weight: bold;
+    color: #000;
+}
+
+.date-info .info-value {
+    font-size: 15px;
+    color: #2F4F4F;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 576px) {
+    .date-pair-grid {
+        gap: 8px;
+    }
+
+    .return-fine-grid {
+        grid-template-columns: 1.1fr 1fr 0.9fr;
+        gap: 6px;
+    }
+
+    .date-info .info-label,
+    .date-info .info-value {
+        font-size: 12px;
+    }
+}
