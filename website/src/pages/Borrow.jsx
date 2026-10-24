@@ -8,8 +8,8 @@ import "./borrow.css";
 import maraLogo from "../assets/Mara.png";
 import tvetmaraLogo from "../assets/Tmsp.png";
 
-const API_URL = "http://localhost:5003";
-
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:5003/api";
 
 function getFigureSrc(figure) {
     if (!figure || typeof figure !== "string") {
@@ -51,12 +51,15 @@ function Borrow({ user }) {
                 setLoading(true);
                 setError("");
 
-                const response = await axios.get(
-                    `${API_URL}/api/website/borrow`, {
-                        params: { userId: user.user_id },
-                        headers: { Authorization: `Bearer ${localStorage.getItem("token") || ""}` },
-                    }
-                );
+            const response = await axios.get(
+                `${API_URL}/website/borrow`,
+                {
+                    params: { userId: user.user_id },
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token") || ""}`
+                    },
+                }
+            );
 
                 if (response.data?.success) {
                     setTransactions(
