@@ -32,8 +32,12 @@ function Login({ setUser }) {
         setLoading(true);
 
         try {
+
+            const API_URL =
+                import.meta.env.VITE_API_URL || "http://localhost:5003/api";
+            
             const response = await fetch(
-                "http://localhost:5003/api/website/auth/login",
+                `${API_URL}/website/auth/login`,
                 {
                     method: "POST",
                     headers: {
