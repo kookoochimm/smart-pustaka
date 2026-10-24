@@ -26,7 +26,24 @@ const pool = mysql.createPool({
   dateStrings: true
 });
 
-app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "website" }));
+
+app.get("/api/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.json({
+      status: "ok",
+      service: "smart-pustaka-api",
+      database: "connected"
+    });
+  } catch (error) {
+    console.error("Database health check failed:", error.message);
+    res.status(503).json({
+      status: "error",
+      database: "disconnected"
+    });
+  }
+});
+
 import { createWebsiteController } from "./website_controller.js";
 app.use("/api/website", createWebsiteController(pool));
 app.listen(PORT, "0.0.0.0", () => console.log("website backend running on port " + PORT));
