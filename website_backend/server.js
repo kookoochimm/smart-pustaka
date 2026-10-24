@@ -26,7 +26,6 @@ const pool = mysql.createPool({
   dateStrings: true
 });
 
-
 app.get("/api/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
