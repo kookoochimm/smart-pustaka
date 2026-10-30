@@ -4,6 +4,7 @@ import "./menu.css";
 
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import NotificationCentre from "./NotificationCentre";
 
 import { bookService } from "../services/bookService";
 
@@ -17,6 +18,8 @@ function Menu({ user, onLogout }) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [selectedBook, setSelectedBook] = useState(null);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     // SEARCH BOOK
     const searchBooks = async (e) => {
@@ -100,6 +103,24 @@ function Menu({ user, onLogout }) {
                         className="tvetmara-logo"
                     />
                 </div>
+
+                {/* NOTIFICATION BELL */}
+                <button
+                    type="button"
+                    className="notification-bell-btn"
+                    onClick={() => setShowNotifications(true)}
+                    aria-label={`Open notifications, ${unreadCount} unread`}
+                >
+                    <span aria-hidden="true">🔔</span>
+                    {unreadCount > 0 && <span className="notification-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                </button>
+
+                {showNotifications && (
+                    <NotificationCentre
+                        onClose={() => setShowNotifications(false)}
+                        onUnreadChange={setUnreadCount}
+                    />
+                )}
 
                 {/* WELCOME */}
                 <div className="row w-100">

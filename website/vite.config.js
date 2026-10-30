@@ -6,6 +6,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.js",
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
+      },
       registerType: "autoUpdate",
       includeAssets: ["apple-touch-icon.png"],
       manifest: {
@@ -24,12 +30,6 @@ export default defineConfig({
           { src: "/pwa-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
           { src: "/pwa-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
         ]
-      },
-      workbox: {
-        navigateFallback: "/index.html",
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
-        navigateFallbackDenylist: [/^\/api\//],
-        cleanupOutdatedCaches: true
       }
     })
   ]
