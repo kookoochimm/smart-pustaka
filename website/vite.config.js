@@ -1,1 +1,36 @@
-import {defineConfig} from 'vite'; import react from '@vitejs/plugin-react'; export default defineConfig({plugins:[react()]});
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["apple-touch-icon.png"],
+      manifest: {
+        id: "/",
+        name: "SMART PUSTAKA",
+        short_name: "SMART PUSTAKA",
+        description: "SMART PUSTAKA - Self-service library system for TVETMARA Sungai Petani.",
+        start_url: "/login",
+        scope: "/",
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#ffffff",
+        theme_color: "#191970",
+        icons: [
+          { src: "/pwa-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "/pwa-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "/pwa-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
+        ]
+      },
+      workbox: {
+        navigateFallback: "/index.html",
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
+        navigateFallbackDenylist: [/^\/api\//],
+        cleanupOutdatedCaches: true
+      }
+    })
+  ]
+});
