@@ -1,5 +1,14 @@
-node_modules/
-dist/
+# Environment variables
 .env
 .env.*
 !.env.example
+
+# SSL certificates
+*.pem
+*.key
+
+# Node dependencies
+node_modules/
+
+# Build files
+dist/

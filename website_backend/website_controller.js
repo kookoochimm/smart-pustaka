@@ -1,10 +1,42 @@
 import express from "express";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
+import webpush from "web-push";
 
 export function createWebsiteController(pool) {
   const router = express.Router();
   const sessions = new Map();
+
+  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT;
+
+  if (vapidPublicKey && vapidPrivateKey && vapidSubject) {
+    webpush.setVapidDetails(
+      vapidSubject,
+      vapidPublicKey,
+      vapidPrivateKey
+    );
+  }
+
   const asyncRoute = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+  
+  // Public VAPID key for browser Push Notifications
+  router.get("/notifications/vapid-public-key", (req, res) => {
+    const publicKey = process.env.VAPID_PUBLIC_KEY;
+
+    if (!publicKey) {
+      return res.status(503).json({
+        success: false,
+        message: "VAPID_PUBLIC_KEY is not configured."
+      });
+    }
+
+    return res.json({
+      success: true,
+      publicKey
+    });
+  });
 
   function requireLogin(req, res, next) {
     const token = String(req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
@@ -15,6 +47,245 @@ export function createWebsiteController(pool) {
     req.websiteUserId = sessions.get(token);
     next();
   }
+
+  
+  // GET ALL NOTIFICATIONS
+  router.get(
+    "/notifications",
+    requireLogin,
+    asyncRoute(async (req, res) => {
+      const [notifications] = await pool.execute(
+        `SELECT
+          notification_id,
+          borrow_id,
+          notification_type,
+          title,
+          message,
+          is_read,
+          created_at,
+          read_at
+        FROM notifications
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT 100`,
+        [req.websiteUserId]
+      );
+
+      return res.json({
+        success: true,
+        notifications
+      });
+    })
+  );
+
+
+  // MARK NOTIFICATION AS READ
+  router.patch(
+    "/notifications/:id/read",
+    requireLogin,
+    asyncRoute(async (req, res) => {
+      const notificationId = req.params.id;
+
+      if (!/^\d+$/.test(notificationId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid notification ID."
+        });
+      }
+
+      const [result] = await pool.execute(
+        `UPDATE notifications
+         SET is_read = 1,
+             read_at = COALESCE(read_at, NOW())
+         WHERE notification_id = ?
+           AND user_id = ?`,
+        [notificationId, req.websiteUserId]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Notification not found."
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Notification marked as read."
+      });
+    })
+  );
+  
+  // Save browser Push Subscription
+  router.post(
+    "/notifications/subscribe",
+    requireLogin,
+    asyncRoute(async (req, res) => {
+      if (!vapidPublicKey || !vapidPrivateKey || !vapidSubject) {
+        return res.status(503).json({
+          success: false,
+          message: "VAPID configuration is incomplete."
+        });
+      }
+
+      const subscription = req.body?.subscription;
+
+      const endpoint = String(subscription?.endpoint || "").trim();
+      const p256dh = String(subscription?.keys?.p256dh || "").trim();
+      const auth = String(subscription?.keys?.auth || "").trim();
+
+      if (!endpoint || !p256dh || !auth) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid push subscription."
+        });
+      }
+
+      const endpointHash = createHash("sha256")
+        .update(endpoint)
+        .digest("hex");
+
+      await pool.execute(
+        `INSERT INTO push_subscriptions
+          (user_id, endpoint, endpoint_hash, p256dh, auth)
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+          user_id = VALUES(user_id),
+          endpoint = VALUES(endpoint),
+          p256dh = VALUES(p256dh),
+          auth = VALUES(auth)`,
+        [
+          req.websiteUserId,
+          endpoint,
+          endpointHash,
+          p256dh,
+          auth
+        ]
+      );
+
+      return res.json({
+        success: true,
+        message: "Push subscription saved successfully."
+      });
+    })
+  );
+
+  // Remove browser Push Subscription
+  router.delete(
+    "/notifications/subscribe",
+    requireLogin,
+    asyncRoute(async (req, res) => {
+      const endpoint = String(req.body?.endpoint || "").trim();
+
+      if (!endpoint) {
+        return res.status(400).json({
+          success: false,
+          message: "Subscription endpoint is required."
+        });
+      }
+
+      const endpointHash = createHash("sha256")
+        .update(endpoint)
+        .digest("hex");
+
+      await pool.execute(
+        `DELETE FROM push_subscriptions
+         WHERE endpoint_hash = ? AND user_id = ?`,
+        [endpointHash, req.websiteUserId]
+      );
+
+      return res.json({
+        success: true,
+        message: "Push subscription removed successfully."
+      });
+    })
+  );
+
+  
+  // ==========================================
+  // TEST PUSH NOTIFICATION
+  // ==========================================
+
+  router.post(
+    "/notifications/test",
+    requireLogin,
+    asyncRoute(async (req, res) => {
+      if (!vapidPublicKey || !vapidPrivateKey || !vapidSubject) {
+        return res.status(503).json({
+          success: false,
+          message: "VAPID configuration is incomplete.",
+        });
+      }
+
+      const [subscriptions] = await pool.query(
+        `SELECT subscription_id, endpoint, p256dh, auth
+         FROM push_subscriptions
+         WHERE user_id = ?`,
+        [req.websiteUserId]
+      );
+
+      if (!subscriptions.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No push subscription found for this user.",
+        });
+      }
+
+      const payload = JSON.stringify({
+        title: "SMART PUSTAKA",
+        message: "Push Notification berjaya! Sistem SMART PUSTAKA kini aktif.",
+        url: "/menu",
+        tag: "smart-pustaka-test",
+      });
+
+      let sent = 0;
+      let failed = 0;
+
+      for (const row of subscriptions) {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: row.endpoint,
+              keys: {
+                p256dh: row.p256dh,
+                auth: row.auth,
+              },
+            },
+            payload
+          );
+
+          sent++;
+
+        } catch (error) {
+          console.error(
+            "Push delivery error:",
+            error.statusCode,
+            error.message
+          );
+
+          failed++;
+
+          // Remove expired or invalid subscriptions
+          if (error.statusCode === 404 || error.statusCode === 410) {
+            await pool.execute(
+              `DELETE FROM push_subscriptions
+               WHERE subscription_id = ?`,
+              [row.subscription_id]
+            );
+          }
+        }
+      }
+
+      return res.json({
+        success: sent > 0,
+        message: sent > 0
+          ? "Test push notification sent successfully."
+          : "Unable to deliver push notification.",
+        sent,
+        failed,
+      });
+    })
+  );
 
   // Website login is separate from the RFID/admin dashboard login. Any active user may log in.
   router.post("/auth/login", asyncRoute(async (req, res) => {
