@@ -1,0 +1,25 @@
+
+name: SMART PUSTAKA Daily Reminders
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run daily reminder system
+        env:
+          API_URL: https://smart-pustaka-api.onrender.com
+          REMINDER_SECRET: ${{ secrets.REMINDER_SECRET }}
+
+        run: |
+          curl --fail-with-body --show-error --silent \
+            --request POST \
+            --url "$API_URL/api/reminders/run" \
+            --header "x-reminder-secret: $REMINDER_SECRET" \
+            --header "Content-Type: application/json"
